@@ -34,13 +34,13 @@ class BarcodeListElement extends StatelessWidget {
             icon: Icons.delete,
             label: 'Delete',
           ),
-          SlidableAction(
-            onPressed: (_) => print('Change  pressed'),
-            backgroundColor: Color(0xFF21B7CA),
-            foregroundColor: Colors.white,
-            icon: Icons.loop,
-            label: 'Loop',
-          ),
+          // SlidableAction(
+          //   onPressed: (_) => print('Change  pressed'),
+          //   backgroundColor: Color(0xFF21B7CA),
+          //   foregroundColor: Colors.white,
+          //   icon: Icons.change_circle,
+          //   label: 'Update',
+          // ),
         ],
       ),
       child: ListTile(

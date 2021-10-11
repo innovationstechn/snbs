@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/src/framework.dart';
 import 'package:snbs/models/dnn.dart';
 import 'package:snbs/models/sn.dart';
-import 'package:snbs/pages/base_scan_page.dart';
+import 'package:snbs/pages/base_scan_page/base_scan_page.dart';
 import 'package:snbs/state/scanned_barcodes.dart';
 
 class SNScanPage extends BaseScanScreen {
@@ -14,8 +14,10 @@ class SNScanPage extends BaseScanScreen {
 
   @override
   Widget build(BuildContext context, ScopedReader ref) {
-    final scanned =
-        ref(ScannedBarcodes.state).scanned[dnnIndex].articleNumbers[eanIndex];
+    final scanned = context
+        .read(ScannedBarcodes.state)
+        .scanned[dnnIndex]
+        .articleNumbers[eanIndex];
 
     return Scaffold(
       appBar: null,
@@ -79,16 +81,30 @@ class SNScanPage extends BaseScanScreen {
   }
 
   @override
-  Future<void> onScanSuccess(ScopedReader ref, String item) async {
-    DNN old = ref(ScannedBarcodes.state).scanned[dnnIndex];
-    old.articleNumbers[eanIndex].addSN(SN(sn: item));
+  Future<void> onScanSuccess(
+      BuildContext context, ScopedReader ref, String item) async {
+    final scannedBarcodes = ref(ScannedBarcodes.state);
+    DNN old = scannedBarcodes.scanned[dnnIndex];
 
-    DNN updated = DNN(
-      dnn: old.dnn,
-      articleNumbers: old.articleNumbers,
-    );
+    final positionOfOldIfExists = old.articleNumbers[eanIndex].serialNumbers
+        .indexWhere((element) => element.sn == item);
 
-    ref(ScannedBarcodes.state).updateItem(dnnIndex, updated);
+    if (positionOfOldIfExists == -1) {
+      old.articleNumbers[eanIndex].addSN(SN(sn: item));
+
+      DNN updated = DNN(
+        dnn: old.dnn,
+        articleNumbers: old.articleNumbers,
+      );
+
+      scannedBarcodes.updateItem(dnnIndex, updated);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Barcode $item already exists.'),
+        ),
+      );
+    }
   }
 
   @override

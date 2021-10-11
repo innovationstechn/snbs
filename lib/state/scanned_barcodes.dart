@@ -21,6 +21,11 @@ class ScannedBarcodes extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearAll() {
+    scanned.clear();
+    notifyListeners();
+  }
+
   void updateItem(int index, DNN updated) {
     if (index != -1) {
       scanned[index] = updated;

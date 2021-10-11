@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class VerificationModal extends StatelessWidget {
+class VerificationModal extends StatefulWidget {
   final TextEditingController _textEditingController;
   final String _barcode;
   final Function(String) onVerified;
@@ -13,6 +13,11 @@ class VerificationModal extends StatelessWidget {
       : _textEditingController = TextEditingController(text: barcode),
         this._barcode = barcode;
 
+  @override
+  State<VerificationModal> createState() => _VerificationModalState();
+}
+
+class _VerificationModalState extends State<VerificationModal> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -30,7 +35,7 @@ class VerificationModal extends StatelessWidget {
             ),
             SizedBox(height: 15),
             TextField(
-              controller: _textEditingController,
+              controller: widget._textEditingController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderSide: BorderSide(width: 5.0),
@@ -46,7 +51,7 @@ class VerificationModal extends StatelessWidget {
                       backgroundColor: MaterialStateProperty.all(Colors.red),
                       foregroundColor: MaterialStateProperty.all(Colors.white),
                     ),
-                    onPressed: () => onRetake(),
+                    onPressed: () => widget.onRetake(),
                     child: Text("RETAKE"),
                   ),
                 ),
@@ -59,7 +64,8 @@ class VerificationModal extends StatelessWidget {
                       backgroundColor: MaterialStateProperty.all(Colors.green),
                       foregroundColor: MaterialStateProperty.all(Colors.white),
                     ),
-                    onPressed: () => onVerified(_textEditingController.text),
+                    onPressed: () =>
+                        widget.onVerified(widget._textEditingController.text),
                     child: Text("FINISH"),
                   ),
                 )

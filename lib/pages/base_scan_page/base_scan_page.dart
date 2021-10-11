@@ -46,6 +46,7 @@ abstract class BaseScanScreen extends ConsumerWidget {
                 barcode: scanResults.item2,
                 onVerified: (String barcode) {
                   onScanSuccess(
+                    context,
                     ref,
                     barcode,
                   );
@@ -71,7 +72,8 @@ abstract class BaseScanScreen extends ConsumerWidget {
   }
 
   Future<void> onScanError();
-  Future<void> onScanSuccess(ScopedReader ref, String item);
+  Future<void> onScanSuccess(
+      BuildContext context, ScopedReader ref, String item);
   Future<void> onScanCancel();
   Future<void> onDelete(ScopedReader ref, int index);
   Future<void> onUpdate(ScopedReader ref, int index);

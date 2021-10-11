@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:snbs/api/api.dart';
 import 'package:snbs/models/dnn.dart';
-import 'package:snbs/pages/base_scan_page.dart';
+import 'package:snbs/pages/base_scan_page/base_scan_page.dart';
+import 'package:snbs/pages/base_scan_page/upload_button.dart';
 import 'package:snbs/pages/ean_scan_page.dart';
 import 'package:snbs/state/scanned_barcodes.dart';
 import 'package:snbs/utils/encoding_utils.dart';
@@ -25,13 +27,12 @@ class DNNScanPage extends BaseScanScreen {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () => onFinishPressed(
-                      ref(ScannedBarcodes.state).scanned,
+                UploadButton(
+                  onTap: () => onFinishPressed(
+                      context,
+                      context.read(ScannedBarcodes.state).scanned,
                       '8d92jAss+o',
                       'DEV001'),
-                  label: Text("FINISH/SEND"),
-                  icon: Icon(Icons.cloud_upload_rounded),
                 ),
                 SizedBox(
                   height: 10,
@@ -65,10 +66,23 @@ class DNNScanPage extends BaseScanScreen {
   }
 
   @override
-  Future<void> onScanSuccess(ScopedReader ref, String item) async =>
-      ref(ScannedBarcodes.state).addItem(
-        DNN(dnn: item),
+  Future<void> onScanSuccess(
+      BuildContext context, ScopedReader ref, String item) async {
+    final scannedBarcodes = ref(ScannedBarcodes.state);
+    final newElement = DNN(dnn: item);
+
+    final positionOfOldIfExists =
+        scannedBarcodes.scanned.indexWhere((element) => element.dnn == item);
+
+    if (positionOfOldIfExists == -1)
+      scannedBarcodes.addItem(newElement);
+    else
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Barcode $item already exists.'),
+        ),
       );
+  }
 
   @override
   void onItemTap(int index, BuildContext context) {
@@ -80,7 +94,8 @@ class DNNScanPage extends BaseScanScreen {
     );
   }
 
-  Future<void> onFinishPressed(List<DNN> scanned, String key, String id) async {
+  Future<void> onFinishPressed(
+      BuildContext context, List<DNN> scanned, String key, String id) async {
     final data = Map<String, Map<String, List<String>>>();
 
     scanned.forEach((element) {
@@ -95,8 +110,30 @@ class DNNScanPage extends BaseScanScreen {
     Dio dio = Dio();
     APIClient client = APIClient(dio);
 
-    String result =
-        await client.sendDNNs(processed.item1, processed.item2, id, 0);
+    final response = await http.get(
+      Uri.parse(
+          'https://serial.aitigo.de/?data=${processed.item1}&checksum=${processed.item2}&id=$id&debug=0'),
+    );
+
+    final result = response.body;
+
+    if (result == "OK")
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully uploaded to the server.'),
+        ),
+      );
+    else
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error while uploading to the server. $result'),
+        ),
+      );
+
+    context.read(ScannedBarcodes.state).clearAll();
+    //
+    // String result =
+    //     await client.sendDNNs(processed.item1, processed.item2, id, 0);
 
     print(result);
   }
