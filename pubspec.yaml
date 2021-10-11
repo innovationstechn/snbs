@@ -33,6 +33,7 @@ dependencies:
   # Core barcode scanning plugin
   flutter_barcode_scanner: ^2.0.0
 
+  http: ^0.13.4
   # Annotations for freezed classes
   freezed_annotation: ^0.14.3
   # Annotations for marking classes as serializable.

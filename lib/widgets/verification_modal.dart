@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
 
 class VerificationModal extends StatefulWidget {
-  final TextEditingController _textEditingController;
+
   final String _barcode;
   final Function(String) onVerified;
   final Function() onRetake;
 
-  VerificationModal(
-      {required String barcode,
-      required this.onVerified,
-      required this.onRetake})
-      : _textEditingController = TextEditingController(text: barcode),
-        this._barcode = barcode;
+  VerificationModal({required String barcode,
+    required this.onVerified,
+    required this.onRetake})
+      :this._barcode = barcode;
 
   @override
   State<VerificationModal> createState() => _VerificationModalState();
 }
 
 class _VerificationModalState extends State<VerificationModal> {
+  late TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _textEditingController = TextEditingController(
+        text: widget._barcode);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: MediaQuery.of(context).viewInsets,
+      padding: MediaQuery
+          .of(context)
+          .viewInsets,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Column(
@@ -35,7 +45,7 @@ class _VerificationModalState extends State<VerificationModal> {
             ),
             SizedBox(height: 15),
             TextField(
-              controller: widget._textEditingController,
+              controller: _textEditingController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderSide: BorderSide(width: 5.0),
@@ -64,8 +74,10 @@ class _VerificationModalState extends State<VerificationModal> {
                       backgroundColor: MaterialStateProperty.all(Colors.green),
                       foregroundColor: MaterialStateProperty.all(Colors.white),
                     ),
-                    onPressed: () =>
-                        widget.onVerified(widget._textEditingController.text),
+                    onPressed: () {
+                      if (_textEditingController.text != "")
+                        widget.onVerified(_textEditingController.text);
+                    },
                     child: Text("FINISH"),
                   ),
                 )
