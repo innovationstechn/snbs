@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:snbs/api/api.dart';
 import 'package:snbs/models/dnn.dart';
+import 'package:snbs/models/upload_item.dart';
 import 'package:snbs/pages/base_scan_page/base_scan_page.dart';
 import 'package:snbs/pages/base_scan_page/upload_button.dart';
 import 'package:snbs/pages/ean_scan_page.dart';
 import 'package:snbs/state/scanned_barcodes.dart';
+import 'package:snbs/state/uploading_state.dart';
 import 'package:snbs/utils/encoding_utils.dart';
 import 'package:tuple/tuple.dart';
 
@@ -33,6 +34,22 @@ class DNNScanPage extends BaseScanScreen {
                       context.read(ScannedBarcodes.state).scanned,
                       '8d92jAss+o',
                       'DEV001'),
+                ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    UploadingState state = ref(UploadingState.state);
+
+                    if (state.isUploading)
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    else if (state.itemsNeedToBeUploaded)
+                      return Center(
+                        child: Text('Items need to be uploaded'),
+                      );
+
+                    return Container();
+                  },
                 ),
                 SizedBox(
                   height: 10,
@@ -110,32 +127,36 @@ class DNNScanPage extends BaseScanScreen {
     Dio dio = Dio();
     APIClient client = APIClient(dio);
 
-    final response = await http.get(
-      Uri.parse(
-          'https://serial.aitigo.de/?data=${processed.item1}&checksum=${processed.item2}&id=$id&debug=0'),
-    );
+    UploadItem item = UploadItem(
+        url: 'https://serial.aitigo.de',
+        data: processed.item1,
+        checksum: processed.item2,
+        id: id);
 
-    final result = response.body;
+    await context.read(UploadingState.state).queue(item);
+    await context.read(UploadingState.state).upload();
 
-    if (result == "OK")
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully uploaded to the server.'),
-        ),
-      );
-    else
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error while uploading to the server. $result'),
-        ),
-      );
+    // final result = response.body;
+    //
+    // if (result == "OK")
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Successfully uploaded to the server.'),
+    //     ),
+    //   );
+    // else
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Error while uploading to the server. $result'),
+    //     ),
+    //   );
 
-    context.read(ScannedBarcodes.state).clearAll();
+    // context.read(ScannedBarcodes.state).clearAll();
     //
     // String result =
     //     await client.sendDNNs(processed.item1, processed.item2, id, 0);
 
-    print(result);
+    // print(result);
   }
 
   @override

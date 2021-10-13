@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:snbs/api/data_uploader.dart';
+import 'package:snbs/models/upload_item.dart';
 import 'package:snbs/pages/dnn_scan_page.dart';
 
-void main() {
+void main() async {
+  await _initHive();
+  Hive.registerAdapter(UploadItemAdapter());
   runApp(
     ProviderScope(
       child: const MyApp(),
@@ -34,6 +39,12 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+Future<void> _initHive() async {
+  await Hive.initFlutter();
+  await DataUploader.initialize();
+}
+
 //
 // class MyHomePage extends StatefulWidget {
 //   const MyHomePage({Key? key, required this.title}) : super(key: key);

@@ -24,7 +24,6 @@ class _APIClient implements APIClient {
       r'id': id,
       r'debug': debug
     };
-
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<String>(_setStreamType<String>(
