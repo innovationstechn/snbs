@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:snbs/api/data_uploader.dart';
+import 'package:snbs/models/configuration.dart';
 import 'package:snbs/models/upload_item.dart';
 import 'package:snbs/pages/dnn_scan_page.dart';
+import 'package:snbs/state/configuration_state.dart';
 
 void main() async {
-  Hive.registerAdapter(UploadItemAdapter());
   await _initHive();
   runApp(
     ProviderScope(
@@ -41,8 +42,12 @@ class MyApp extends StatelessWidget {
 }
 
 Future<void> _initHive() async {
+  Hive.registerAdapter(UploadItemAdapter());
+  Hive.registerAdapter(ConfigurationAdapter());
+
   await Hive.initFlutter();
   await DataUploader.initialize();
+  await ConfigurationState.initialize();
 }
 
 //
