@@ -6,8 +6,8 @@ import 'package:snbs/models/upload_item.dart';
 import 'package:snbs/pages/dnn_scan_page.dart';
 
 void main() async {
-  await _initHive();
   Hive.registerAdapter(UploadItemAdapter());
+  await _initHive();
   runApp(
     ProviderScope(
       child: const MyApp(),
